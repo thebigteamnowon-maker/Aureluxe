@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AURÉLUXE — Luxury Themes</title>
+<style>
+:root{--bg:#080808;--panel:#111;--panel2:#171513;--text:#f7f3ec;--muted:#aaa39a;--gold:#d6c09b;--line:#2b2722}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#18140f 0,#080808 38%);color:var(--text);font-family:Inter,system-ui,sans-serif}
+button,input{font:inherit}.top{position:sticky;top:0;z-index:20;background:#090909e8;backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.nav{max-width:1280px;margin:auto;padding:15px 20px;display:flex;align-items:center;gap:14px}.brand{font:500 21px Georgia,serif;letter-spacing:4px;margin-right:auto}.nav button{background:none;border:1px solid var(--line);color:#ddd;border-radius:11px;padding:9px 12px;cursor:pointer}.nav .gold{background:var(--gold);color:#111;border:0}
+.hero{max-width:1280px;margin:auto;padding:58px 20px 22px}.eyebrow{letter-spacing:4px;color:var(--gold);font-size:11px}.hero h1{font:500 clamp(45px,8vw,88px)/.9 Georgia,serif;margin:13px 0}.hero p{color:var(--muted);max-width:650px;line-height:1.6}.search{display:flex;gap:10px;margin-top:24px}.search input{width:100%;background:#111;border:1px solid var(--line);color:white;padding:14px;border-radius:13px;outline:none}
+.cats{max-width:1280px;margin:auto;padding:12px 20px 25px;display:flex;gap:8px;overflow:auto}.cat{white-space:nowrap;background:#111;border:1px solid var(--line);color:#ddd;border-radius:999px;padding:9px 15px;cursor:pointer}.cat.active{background:var(--gold);color:#111}
+.wrap{max-width:1280px;margin:auto;padding:0 20px 70px}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin:15px 0}.sectionhead h2{font:500 28px Georgia,serif}.count{color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:15px}.card{position:relative;aspect-ratio:9/15;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#151515;cursor:pointer}.card img{width:100%;height:100%;object-fit:cover;display:block;transition:.35s}.card:hover img{transform:scale(1.045)}.shade{position:absolute;inset:0;background:linear-gradient(transparent 48%,#000d 100%)}.meta{position:absolute;bottom:13px;left:14px;right:14px}.meta b{display:block;font-size:15px}.meta small{color:#d5d0c9}.heart,.dl{position:absolute;top:11px;border:0;border-radius:50%;width:37px;height:37px;background:#000b;color:#fff;cursor:pointer}.heart{right:54px}.dl{right:11px}.premium{position:absolute;top:12px;left:12px;background:var(--gold);color:#111;border-radius:7px;padding:5px 7px;font-size:10px;font-weight:800;letter-spacing:1px}
+.empty{text-align:center;color:var(--muted);padding:60px;display:none}
+.overlay{position:fixed;inset:0;background:#000b;backdrop-filter:blur(10px);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}.overlay.open{display:flex}.modal{background:#111;border:1px solid var(--line);border-radius:22px;max-width:900px;width:100%;max-height:92vh;overflow:auto;padding:18px}.modalgrid{display:grid;grid-template-columns:minmax(220px,430px) 1fr;gap:20px}.modal img{width:100%;border-radius:15px;max-height:70vh;object-fit:cover}.close{float:right;background:none;border:0;color:white;font-size:27px;cursor:pointer}.primary{display:inline-block;background:var(--gold);color:#111;border:0;padding:13px 17px;border-radius:11px;font-weight:800;cursor:pointer;text-decoration:none;margin:8px 6px 0 0}.secondary{background:#181818;color:#eee;border:1px solid var(--line);padding:12px 15px;border-radius:11px;cursor:pointer}.muted{color:var(--muted);line-height:1.6}.form{display:grid;gap:11px}.form input,.form textarea{background:#0b0b0b;border:1px solid var(--line);color:white;padding:13px;border-radius:10px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#eee;color:#111;padding:12px 16px;border-radius:10px;display:none;z-index:100;font-size:14px}
+@media(max-width:680px){.modalgrid{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.nav{flex-wrap:wrap}.nav button{font-size:12px}}
+</style>
+</head>
+<body>
+<header class="top"><nav class="nav">
+<div class="brand">AURÉLUXE</div>
+<button onclick="showFavorites()">♡ Favorites <span id="favCount"></span></button>
+<button onclick="showAccount()">Account</button>
+<button class="gold" onclick="showPremium()">Premium</button>
+</nav></header>
+
+<section class="hero">
+<div class="eyebrow">THE LUXURY WALLPAPER LIBRARY</div>
+<h1>Your screen.<br>Elevated.</h1>
+<p>Browse curated luxury wallpapers across nature, gaming, minimal, cars, architecture, abstract and more.</p>
+<div class="search"><input id="search" placeholder="Search the AURÉLUXE library…"></div>
+</section>
+<div class="cats" id="cats"></div>
+<main class="wrap"><div class="sectionhead"><h2 id="title">Featured</h2><span class="count" id="count"></span></div><div class="grid" id="grid"></div><div class="empty" id="empty">No wallpapers found.</div></main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const cats=["All","Nature","Gaming","Luxury","Cars","Architecture","Minimal","Abstract","Space","Aesthetic"];
+const seeds=[
+["Midnight Mountains","Nature",false],["Golden Desert","Nature",true],["Emerald Forest","Nature",false],["Ocean Noir","Nature",true],["Alpine Dawn","Nature",false],
+["Neon Circuit","Gaming",true],["Cyber City","Gaming",false],["Obsidian Console","Gaming",true],["Midnight Arena","Gaming",false],["Chrome Grid","Gaming",false],
+["Black & Gold","Luxury",true],["Velvet Noir","Luxury",true],["Champagne Marble","Luxury",true],["Royal Shadow","Luxury",false],["Onyx Gold","Luxury",true],
+["Phantom Drive","Cars",true],["Silver GT","Cars",false],["Midnight Coupe","Cars",true],["Monaco Night","Cars",false],["Carbon Luxe","Cars",true],
+["Modern Lines","Architecture",false],["Marble House","Architecture",true],["Glass Tower","Architecture",false],["Night Gallery","Architecture",true],["Quiet Hall","Architecture",false],
+["Clean Beige","Minimal",false],["Monochrome","Minimal",false],["Soft Stone","Minimal",true],["Ivory Lines","Minimal",false],["Dark Space","Minimal",false],
+["Liquid Gold","Abstract",true],["Black Silk","Abstract",false],["Pearl Wave","Abstract",false],["Molten","Abstract",true],["Noir Smoke","Abstract",false],
+["Deep Cosmos","Space",true],["Lunar Gold","Space",false],["Nebula Noir","Space",true],["Starlight","Space",false],["Solar Eclipse","Space",true],
+["Golden Hour","Aesthetic",false],["Night Drive","Aesthetic",true],["Coffee Noir","Aesthetic",false],["City Glow","Aesthetic",false],["Old Money","Aesthetic",true]
+];
+const img=(q)=>`https://images.unsplash.com/${q}?auto=format&fit=crop&w=1000&q=88`;
+const imageMap={
+"Midnight Mountains":img("photo-1464822759023-fed622ff2c3b"),"Golden Desert":img("photo-1500530855697-b586d89ba3ee"),"Emerald Forest":img("photo-1448375240586-882707db888b"),"Ocean Noir":img("photo-1507525428034-b723cf961d3e"),"Alpine Dawn":img("photo-1464278533981-50106e6176b1"),
+"Neon Circuit":img("photo-1519608487953-e999c86e7455"),"Cyber City":img("photo-1519608487953-e999c86e7455"),"Obsidian Console":img("photo-1493225457124-a3eb161ffa5f"),"Midnight Arena":img("photo-1511512578047-dfb367046420"),"Chrome Grid":img("photo-1517336714739-489689fd1ca8"),
+"Black & Gold":img("photo-1494438639946-1ebd1d20bf85"),"Velvet Noir":img("photo-1557682250-33bd709cbe85"),"Champagne Marble":img("photo-1618221195710-dd6b41faaea6"),"Royal Shadow":img("photo-1524504388940-b1c1722653e1"),"Onyx Gold":img("photo-1513506003901-1e6a229e2d15"),
+"Phantom Drive":img("photo-1503736334956-4c8f8e92946d"),"Silver GT":img("photo-1492144534655-ae79c964c9d7"),"Midnight Coupe":img("photo-1542282088-72c9c27ed0cd"),"Monaco Night":img("photo-1493238792000-8113da705763"),"Carbon Luxe":img("photo-1503376780353-7e6692767b70"),
+"Modern Lines":img("photo-1487958449943-2429e8be8625"),"Marble House":img("photo-1600607687920-4e2a09cf159d"),"Glass Tower":img("photo-1486406146926-c627a92ad1ab"),"Night Gallery":img("photo-1531058020387-3be344556be6"),"Quiet Hall":img("photo-1497366811353-6870744d04b2"),
+"Clean Beige":img("photo-1497366754035-f200968a6e72"),"Monochrome":img("photo-1518005020951-eccb494ad742"),"Soft Stone":img("photo-1600566753086-00f18fb6b3ea"),"Ivory Lines":img("photo-1555041469-a586c61ea9bc"),"Dark Space":img("photo-1519710164239-da123dc03ef4"),
+"Liquid Gold":img("photo-1531058020387-3be344556be6"),"Black Silk":img("photo-1515372039744-b8f02a3ae446"),"Pearl Wave":img("photo-1500530855697-b586d89ba3ee"),"Molten":img("photo-1541701494587-cb58502866ab"),"Noir Smoke":img("photo-1518837695005-2083093ee35b"),
+"Deep Cosmos":img("photo-1444703686981-a3abbc4d4fe3"),"Lunar Gold":img("photo-1534791547706-1e7f2d5f8c9b"),"Nebula Noir":img("photo-1462331940025-496dfbfc7564"),"Starlight":img("photo-1446776877081-d282a0f896e2"),"Solar Eclipse":img("photo-1502134249126-9f3755a50d78"),
+"Golden Hour":img("photo-1470770841072-f978cf4d019e"),"Night Drive":img("photo-1493238792000-8113da705763"),"Coffee Noir":img("photo-1495474472287-4d71bcdd2085"),"City Glow":img("photo-1519501025264-65ba15a82390"),"Old Money":img("photo-1515886657613-9f3515b0c78f")
+};
+let data=seeds.map((x,i)=>({id:i+1,name:x[0],cat:x[1],premium:x[2],url:imageMap[x[0]]}));
+let state={cat:"All",q:"",favorites:JSON.parse(localStorage.getItem("aureluxe_favs")||"[]"),user:JSON.parse(localStorage.getItem("aureluxe_user")||"null")};
+const $=s=>document.querySelector(s);
+function toast(s){$("#toast").textContent=s;$("#toast").style.display="block";setTimeout(()=>$("#toast").style.display="none",1800)}
+function renderCats(){cats.forEach(c=>{let b=document.createElement("button");b.className="cat"+(c===state.cat?" active":"");b.textContent=c;b.onclick=()=>{state.cat=c;render()};$("#cats").appendChild(b)})}
+function render(){document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.textContent===state.cat));let q=state.q.toLowerCase();let list=data.filter(x=>(state.cat==="All"||x.cat===state.cat)&&(!q||x.name.toLowerCase().includes(q)||x.cat.toLowerCase().includes(q)));$("#title").textContent=state.cat==="All"?"Featured":state.cat;$("#count").textContent=list.length+" themes";$("#grid").innerHTML="";$("#empty").style.display=list.length?"none":"block";list.forEach(x=>{let d=document.createElement("article");d.className="card";d.innerHTML=`<img src="${x.url}" alt="${x.name}" loading="lazy"><div class="shade"></div>${x.premium?'<div class="premium">PREMIUM</div>':''}<button class="heart">${state.favorites.includes(x.id)?"♥":"♡"}</button><button class="dl">↓</button><div class="meta"><b>${x.name}</b><small>${x.cat}</small></div>`;d.onclick=()=>open(x);d.querySelector(".heart").onclick=e=>{e.stopPropagation();fav(x.id)};d.querySelector(".dl").onclick=e=>{e.stopPropagation();download(x)};$("#grid").appendChild(d)})}
+function fav(id){if(state.favorites.includes(id))state.favorites=state.favorites.filter(x=>x!==id);else state.favorites.push(id);localStorage.setItem("aureluxe_favs",JSON.stringify(state.favorites));render();toast("Favorites updated")}
+function download(x){if(x.premium && !state.user?.premium){showPremium();return}let a=document.createElement("a");a.href=x.url;a.download=x.name.replaceAll(" ","-")+".jpg";a.target="_blank";document.body.appendChild(a);a.click();a.remove();toast("Opening full-resolution download")}
+function open(x){$("#modal").innerHTML=`<button class="close" onclick="closeModal()">×</button><div class="modalgrid"><img src="${x.url}" alt="${x.name}"><div><div class="eyebrow">${x.cat}</div><h2 style="font:500 38px Georgia,serif">${x.name}</h2><p class="muted">${x.premium?"Premium AURÉLUXE theme.":"AURÉLUXE collection theme."}</p><button class="primary" onclick='download(${JSON.stringify(x)})'>Download</button><button class="secondary" onclick="fav(${x.id});closeModal()">♡ Save to favorites</button></div></div>`;$("#overlay").classList.add("open")}
+function closeModal(){$("#overlay").classList.remove("open")}
+function showFavorites(){let ids=new Set(state.favorites);state.cat="All";state.q="";render();let list=data.filter(x=>ids.has(x.id));$("#title").textContent="Your Favorites";$("#count").textContent=list.length+" saved";$("#grid").innerHTML="";list.forEach(x=>{let d=document.createElement("article");d.className="card";d.innerHTML=`<img src="${x.url}"><div class="shade"></div><button class="heart">♥</button><div class="meta"><b>${x.name}</b><small>${x.cat}</small></div>`;d.onclick=()=>open(x);$("#grid").appendChild(d)})}
+function showAccount(){ $("#modal").innerHTML=`<button class="close" onclick="closeModal()">×</button><h2 style="font:500 38px Georgia,serif">${state.user?"Welcome back":"Create your AURÉLUXE account"}</h2>${state.user?`<p class="muted">Signed in as <b>${state.user.name}</b>${state.user.premium?" • Premium member":""}</p><button class="secondary" onclick="logout()">Log out</button>`:`<form class="form" onsubmit="signup(event)"><input id="name" placeholder="Display name" required><input id="email" type="email" placeholder="Email" required><input id="pass" type="password" placeholder="Password" minlength="6" required><button class="primary">Create account</button></form><p class="muted">Demo account storage is local to this browser. A production service needs a secure hosted authentication/database backend.</p>`}`;$("#overlay").classList.add("open")}
+function signup(e){e.preventDefault();state.user={name:$("#name").value,email:$("#email").value,premium:false};localStorage.setItem("aureluxe_user",JSON.stringify(state.user));toast("Account created");closeModal()}
+function logout(){state.user=null;localStorage.removeItem("aureluxe_user");closeModal();toast("Logged out")}
+function showPremium(){$("#modal").innerHTML=`<button class="close" onclick="closeModal()">×</button><div class="eyebrow">AURÉLUXE PRIVÉ</div><h2 style="font:500 42px Georgia,serif">Premium themes.</h2><p class="muted">Unlock the premium collection in the production version. This demo shows the complete premium flow without taking payments.</p><button class="primary" onclick="showAccount()">Create account</button>`;$("#overlay").classList.add("open")}
+$("#search").oninput=e=>{state.q=e.target.value;render()};$("#overlay").onclick=e=>{if(e.target===$("#overlay"))closeModal()};$("#favCount").textContent=state.favorites.length?"("+state.favorites.length+")":"";renderCats();render();
+</script>
+</body></html>
